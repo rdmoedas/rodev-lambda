@@ -29,7 +29,8 @@ exports.handler = async (event, context) => {
         body = await dynamo.delete(JSON.parse(event.body)).promise();
         break;
       case 'GET':
-        body = await dynamo.scan({ TableName: event.queryStringParameters.TableName }).promise();
+        const workList = await dynamo.scan({ TableName: tableName }).promise();
+        body = await orderArray(workList.Items);
         break;
       case 'POST':
         body = await dynamo.put(JSON.parse(event.body)).promise();
@@ -53,3 +54,9 @@ exports.handler = async (event, context) => {
     headers,
   };
 };
+
+async function orderArray(array) {
+  return array.sort((a, b) => {
+    return a['order'] - b['order'];
+  });
+}
